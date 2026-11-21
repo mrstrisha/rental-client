@@ -44,10 +44,10 @@ const menuItemsbyRole: Record<UserRole, MenuItem[]> = {
     { name: "Profile", url: "/Dashboard/profile", icon: User },
   ],
   admin: [
-    { name: "All Users", url: "/Dashboard/admin/users", icon: Users },
-    { name: "All Equipment", url: "/Dashboard/admin/equipment", icon: PackageCheck },
-    { name: "All Rentals", url: "/Dashboard/admin/rentals", icon: ClipboardList },
-    { name: "My Profile", url: "/Dashboard/profile", icon: User },
+{ name: "All Users", url: "/Dashboard/admin/users", icon: Users },
+{ name: "All Equipment", url: "/Dashboard/admin/equipment", icon: PackageCheck },
+{ name: "All Rentals", url: "/Dashboard/admin/rentals", icon: ClipboardList },
+{ name: "My Profile", url: "/Dashboard/admin/profile", icon: User },
   ],
   owner: [
     { name: "Add Equipment", url: "/Dashboard/owner/addEquipment", icon: PlusCircle },

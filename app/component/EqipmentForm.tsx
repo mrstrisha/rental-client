@@ -18,7 +18,7 @@ function Field({ label, children, full }: { label: string; children: React.React
   );
 }
 
-export default function AddEquipmentForm() {
+export default function AddEquipmentForm(props: any)  {
   const router = useRouter();
 
   const [form, setForm] = useState({
@@ -98,7 +98,7 @@ export default function AddEquipmentForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="mt-6 grid max-w-3xl gap-5 rounded-2xl border border-[#D9D9D9] bg-white p-6 md:grid-cols-2">
+    <form onSubmit={handleSubmit} className="m-6 grid max-w-3xl gap-5 rounded-2xl border border-[#D9D9D9] bg-white p-6 md:grid-cols-2">
       <Field label="Equipment name">
         <input required value={form.name} onChange={set("name")} className={inputClass} />
       </Field>

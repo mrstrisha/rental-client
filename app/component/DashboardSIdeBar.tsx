@@ -28,6 +28,7 @@ SidebarMenuItem,
  
 } from "@/components/ui/sidebar";
 import { LucideIcon } from "lucide-react";
+import Link from "next/link";
 type MenuItem = {
   name: string;
   url: string;
@@ -50,9 +51,9 @@ const menuItemsbyRole: Record<UserRole, MenuItem[]> = {
   ],
   owner: [
     { name: "Add Equipment", url: "/Dashboard/owner/addEquipment", icon: PlusCircle },
-    { name: "My Equipment", url: "/Dashboard/owner/equipment", icon: Package },
-    { name: "My Equipment Rental", url: "/Dashboard/owner/rentals", icon: CalendarCheck },
-    { name: "My Profile", url: "/Dashboard/profile", icon: User },
+    { name: "My Equipment", url: "/Dashboard/owner/myEquiment", icon: Package },
+    { name: "My Equipment Rental", url: "/Dashboard/owner/myEquipmentRental", icon: CalendarCheck },
+    { name: "My Profile", url: "/Dashboard/owner/myprofile", icon: User },
   ],
 };
 export function DashboardSideBar() {
@@ -78,10 +79,10 @@ const menuItems = role ? menuItemsbyRole[role] : [];
  <SidebarMenu>
   {menuItems.map((item: MenuItem)=> (
     <SidebarMenuItem key={item.name}>
-      <SidebarMenuButton render={<a href={item.url} />}>
-        <item.icon />
-        <span>{item.name}</span>
-      </SidebarMenuButton>
+     <SidebarMenuButton render={<Link href={item.url} />}>
+  <item.icon />
+  <span>{item.name}</span>
+</SidebarMenuButton>
     </SidebarMenuItem>
   ))}
 </SidebarMenu>

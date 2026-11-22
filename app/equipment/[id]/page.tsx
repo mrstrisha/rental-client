@@ -195,24 +195,30 @@ export default function EquipmentDetailsPage() {
 
     setBookingBusy(true);
     try {
-      const result = await apiFetch<{ message?: string }>("/api/customer/bookings", {
-        method: "POST",
-        body: JSON.stringify({
-          equipmentId: item._id,
-          startDate: form.startDate,
-          endDate: form.endDate,
-          quantity,
-          phone: form.phone,
-          deliveryAddress: form.deliveryAddress,
-          notes: form.notes,
-        }),
-      });
-      toast.success(result.message || "Booking requested");
-      setBookingOpen(false);
-      setForm(emptyBooking);
+      const result = await apiFetch<{ checkoutUrl?: string; message?: string }>(
+        "/api/customer/bookings",
+        {
+          method: "POST",
+          body: JSON.stringify({
+            equipmentId: item._id,
+            startDate: form.startDate,
+            endDate: form.endDate,
+            quantity,
+            phone: form.phone,
+            deliveryAddress: form.deliveryAddress,
+            notes: form.notes,
+          }),
+        }
+      );
+
+      if (!result.checkoutUrl) {
+        throw new Error("Stripe checkout URL was not returned");
+      }
+
+      toast.success("Redirecting to secure checkout...");
+      window.location.assign(result.checkoutUrl);
     } catch (err) {
-      toast.error((err as Error).message);
-    } finally {
+      toast.error((err as Error).message || "Could not start payment");
       setBookingBusy(false);
     }
   };
@@ -477,7 +483,7 @@ export default function EquipmentDetailsPage() {
               disabled={bookingBusy}
               className={`${btnDark} px-6 py-3 text-sm`}
             >
-              {bookingBusy ? "Submitting..." : "Confirm Booking"}
+              {bookingBusy ? "Opening secure checkout..." : "Confirm Booking"}
             </button>
             <button
               type="button"

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
 import { dashboardUrlForRole } from "@/lib/navLinks";
 import { CATEGORIES } from "@/lib/types";
@@ -8,9 +9,13 @@ import { CATEGORIES } from "@/lib/types";
 const linkClass =
   "text-sm text-[#F3EEE3]/60 transition-colors hover:text-[#D9541E]";
 
-export default function Footer() {
+export default function Footer({ inDashboard = false }: { inDashboard?: boolean }) {
+  const pathname = usePathname();
   const { data: session } = authClient.useSession();
   const user = session?.user;
+
+  // Dashboard layout-er bhitore alada Footer bosano hoy; root layout-e ta dekhabe na.
+  if (!inDashboard && pathname.toLowerCase().startsWith("/dashboard")) return null;
   const dashboardUrl = user
     ? dashboardUrlForRole((user as { role?: string } | undefined)?.role)
     : "/login";

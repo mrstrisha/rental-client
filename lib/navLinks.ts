@@ -49,4 +49,4 @@ export const navLinks: Record<Role, NavLink[]> = {
 };
 
 // Profile shob logged in user er jonno same page
-export const profileHref = "/Dashboard/profile";
+export const profileHref = "/Dashboard/customer/profile";

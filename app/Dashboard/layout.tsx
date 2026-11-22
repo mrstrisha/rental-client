@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { DashboardSideBar } from "../component/DashboardSIdeBar";
 import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
 
 // Tin dashboard (customer, owner, admin) shobar layout eta
 export default function DashboardLayout({ children }: { children: ReactNode }) {
@@ -15,6 +16,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
         <Navbar inDashboard leading={<SidebarTrigger />} />
 
         <div className="w-full px-4 pb-8 md:px-8">{children}</div>
+        <Footer inDashboard />
       </SidebarInset>
     </SidebarProvider>
   );

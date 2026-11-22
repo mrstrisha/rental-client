@@ -172,7 +172,7 @@ export default function Navbar({
                 </div>
                 <div className="h-px bg-[#D9D9D9]" />
                 <Link
-                  href="/dashboard/profile"
+                  href="/dashboard/customer/profile"
                   className="mt-2 block rounded-xl px-3 py-2.5 text-sm text-[#333333] transition-colors hover:bg-[#F3EEE3] hover:text-[#D9541E]"
                 >
                   Profile
@@ -252,7 +252,7 @@ export default function Navbar({
                   </p>
                 </div>
               </div>
-              <Link href="/dashboard/profile" className="block rounded-full px-4 py-2 text-sm text-[#333333] hover:text-[#D9541E]">
+              <Link href="/dashboard/customer/profile" className="block rounded-full px-4 py-2 text-sm text-[#333333] hover:text-[#D9541E]">
                 Profile
               </Link>
               <button

@@ -55,7 +55,13 @@ export default function EquipmentPage() {
         const payload: unknown = await response.json();
         if (!Array.isArray(payload)) throw new Error("Invalid equipment response");
 
-        setItems(payload.filter(isEquipment));
+        // Backend already filters approved; keep the guard here as well so no
+        // pending/rejected listing can ever be rendered publicly.
+        setItems(
+          payload
+            .filter(isEquipment)
+            .filter((item) => String(item.status ?? "").toLowerCase() === "approved")
+        );
       } catch (loadError) {
         if (loadError instanceof DOMException && loadError.name === "AbortError") return;
         setError(
@@ -72,7 +78,11 @@ export default function EquipmentPage() {
 
   const openDetails = (id: string) => {
     if (isPending) return;
-    router.push(session?.user ? `/equipment/${id}` : "/login");
+    router.push(
+      session?.user
+        ? `/equipment/${id}`
+        : `/login?redirect=${encodeURIComponent(`/equipment/${id}`)}`
+    );
   };
 
   const normalizedQuery = query.trim().toLowerCase();

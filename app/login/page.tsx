@@ -59,9 +59,16 @@ const handleLogin = async (
     // Role Better Auth er authenticated user theke ashe, form theke na.
     const role = result.data.user.role;
 
+    // View Details e login-e pathano hoy; login successful-e oi page-e feriye name.
+    const requested = new URLSearchParams(window.location.search).get("redirect");
+    const redirectTarget =
+      requested && requested.startsWith("/") && !requested.startsWith("//")
+        ? requested
+        : dashboardUrlForRole(role);
+
     toast.success("Login successful!");
     startTransition(() => {
-      router.push(dashboardUrlForRole(role));
+      router.push(redirectTarget);
     });
   } catch (error) {
     console.log(error);

@@ -1,7 +1,8 @@
 
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import Link from "next/link";
 import { toast } from "react-toastify";
 import { apiFetch } from "@/lib/apiFetch";
 import type { Equipment, EquipmentInput } from "@/lib/types";
@@ -17,11 +18,28 @@ export default function AllEquipmentPage() {
   const [editing, setEditing] = useState<Equipment | null>(null);
 
   // 1. Page khulle shob equipment ana
+  const loadItems = useCallback(async () => {
+    const data = await apiFetch<Equipment[]>("/api/admin/equipment");
+    setItems(data);
+  }, []);
+
   useEffect(() => {
-    apiFetch<Equipment[]>("/api/admin/equipment")
-      .then((data) => setItems(data))
-      .catch((err) => toast.error(err.message))
-      .finally(() => setLoading(false));
+    let cancelled = false;
+
+    (async () => {
+      try {
+        const data = await apiFetch<Equipment[]>("/api/admin/equipment");
+        if (!cancelled) setItems(data);
+      } catch (err) {
+        if (!cancelled) toast.error((err as Error).message);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   // 2. Approve / Reject
@@ -31,7 +49,7 @@ export default function AllEquipmentPage() {
         method: "PATCH",
         body: JSON.stringify({ status }),
       });
-      setItems(items.map((e) => (e._id === id ? { ...e, status } : e)));
+      await loadItems();
       toast.success(`Equipment ${status}`);
     } catch (err) {
       toast.error((err as Error).message);
@@ -42,13 +60,17 @@ export default function AllEquipmentPage() {
   const handleUpdate = async (values: EquipmentInput) => {
     if (!editing) return;
 
-    await apiFetch(`/api/admin/equipment/${editing._id}`, {
-      method: "PUT",
-      body: JSON.stringify(values),
-    });
-    setItems(items.map((e) => (e._id === editing._id ? { ...e, ...values } : e)));
-    toast.success("Equipment updated");
-    setEditing(null);
+    try {
+      await apiFetch(`/api/admin/equipment/${editing._id}`, {
+        method: "PUT",
+        body: JSON.stringify(values),
+      });
+      await loadItems();
+      toast.success("Equipment updated");
+      setEditing(null);
+    } catch (err) {
+      toast.error((err as Error).message);
+    }
   };
 
   // 4. Delete
@@ -57,7 +79,7 @@ export default function AllEquipmentPage() {
 
     try {
       await apiFetch(`/api/admin/equipment/${item._id}`, { method: "DELETE" });
-      setItems(items.filter((e) => e._id !== item._id));
+      await loadItems();
       toast.success("Equipment deleted");
     } catch (err) {
       toast.error((err as Error).message);
@@ -119,6 +141,9 @@ export default function AllEquipmentPage() {
                   </td>
                   <td className="px-5 py-4">
                     <div className="flex flex-wrap gap-2">
+                      <Link href={`/equipment/${item._id}`} className={btnLight}>
+                        View Details
+                      </Link>
                       <button
                         disabled={status === "approved"}
                         onClick={() => handleStatus(item._id, "approved")}
@@ -159,7 +184,12 @@ export default function AllEquipmentPage() {
               </button>
             </div>
 
-            <AddEquipmentForm initial={editing} submitLabel="Save Changes" onSubmit={handleUpdate} />
+            <AddEquipmentForm
+              key={editing._id}
+              initial={editing}
+              submitLabel="Save Changes"
+              onSubmit={handleUpdate}
+            />
           </div>
         </div>
       )}

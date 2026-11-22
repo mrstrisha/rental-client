@@ -41,6 +41,8 @@ export type Booking = {
   customerEmail: string;
   phone?: string;
   address?: string;
+  deliveryAddress?: string;
+  notes?: string;
   ownerName?: string;
   ownerEmail?: string;
   startDate: string;

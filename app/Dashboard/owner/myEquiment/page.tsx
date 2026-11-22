@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { toast } from "react-toastify";
 import { apiFetch } from "@/lib/apiFetch";
@@ -18,11 +18,28 @@ export default function MyEquipmentPage() {
   const [editing, setEditing] = useState<Equipment | null>(null);
 
   // 1. Page khulle server theke owner er equipment ana
+  const loadItems = useCallback(async () => {
+    const data = await apiFetch<Equipment[]>("/api/owner/equipment");
+    setItems(data);
+  }, []);
+
   useEffect(() => {
-    apiFetch<Equipment[]>("/api/owner/equipment")
-      .then((data) => setItems(data))
-      .catch((err) => toast.error(err.message))
-      .finally(() => setLoading(false));
+    let cancelled = false;
+
+    (async () => {
+      try {
+        const data = await apiFetch<Equipment[]>("/api/owner/equipment");
+        if (!cancelled) setItems(data);
+      } catch (err) {
+        if (!cancelled) toast.error((err as Error).message);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   // 2. Delete
@@ -31,8 +48,7 @@ export default function MyEquipmentPage() {
 
     try {
       await apiFetch(`/api/owner/equipment/${item._id}`, { method: "DELETE" });
-      // list theke oi item ta soriye dao
-      setItems(items.filter((e) => e._id !== item._id));
+      await loadItems();
       toast.success("Equipment deleted");
     } catch (err) {
       toast.error((err as Error).message);
@@ -43,15 +59,17 @@ export default function MyEquipmentPage() {
   const handleUpdate = async (values: EquipmentInput) => {
     if (!editing) return;
 
-    await apiFetch(`/api/owner/equipment/${editing._id}`, {
-      method: "PUT",
-      body: JSON.stringify(values),
-    });
-
-    // list e oi item er notun data boshao
-    setItems(items.map((e) => (e._id === editing._id ? { ...e, ...values } : e)));
-    toast.success("Equipment updated");
-    setEditing(null); // popup bondho
+    try {
+      await apiFetch(`/api/owner/equipment/${editing._id}`, {
+        method: "PUT",
+        body: JSON.stringify(values),
+      });
+      await loadItems();
+      toast.success("Equipment updated");
+      setEditing(null); // popup bondho
+    } catch (err) {
+      toast.error((err as Error).message);
+    }
   };
 
   return (
@@ -98,7 +116,7 @@ export default function MyEquipmentPage() {
                 </td>
                 <td className="px-5 py-4 text-[#333333]">{item.quantity}</td>
                 <td className="px-5 py-4">
-                  <StatusBadge value={item.status} />
+                  <StatusBadge value={String(item.status ?? "pending")} />
                 </td>
                 <td className="px-5 py-4">
                   <div className="flex gap-2">
@@ -131,7 +149,12 @@ export default function MyEquipmentPage() {
             </div>
 
      
-            <AddEquipmentForm initial={editing} submitLabel="Save Changes" onSubmit={handleUpdate}></AddEquipmentForm>
+            <AddEquipmentForm
+              key={editing._id}
+              initial={editing}
+              submitLabel="Save Changes"
+              onSubmit={handleUpdate}
+            />
           </div>
         </div>
       )}

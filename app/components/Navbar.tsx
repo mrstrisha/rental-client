@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { authClient } from "@/lib/auth-client";
+import { dashboardUrlForRole } from "@/lib/navLinks";
 
 // inDashboard = dashboard er bhitore dekhaite hole true. leading = bar er shurute ja boshbe (sidebar button).
 export default function Navbar({
@@ -29,12 +30,15 @@ export default function Navbar({
   const role = rawRole === "admin" || rawRole === "owner" ? rawRole : "customer";
 
   // 2. "My Dashboard" e click korle role onujayi alada dashboard e jabe
-  const dashboardLink =
+  const dashboardLink = dashboardUrlForRole(role);
+
+  // Profile link-o role onujayi (customer profile shob role-er jonno na)
+  const profileLink =
     role === "admin"
-      ? "/Dashboard/admin/users"
+      ? "/Dashboard/admin/profile"
       : role === "owner"
-      ? "/Dashboard/owner/equipment"
-      : "/Dashboard/customer/rentals";
+      ? "/Dashboard/owner/myProfile"
+      : "/Dashboard/customer/profile";
 
   // 3. Navbar er link gulo. My Dashboard shudhu login thakle dekhabe.
   const links = [
@@ -45,8 +49,12 @@ export default function Navbar({
 
   // Page bodlale menu bondho
   useEffect(() => {
-    setMobileOpen(false);
-    setDropOpen(false);
+    // Defer the state update so the effect body does not synchronously setState.
+    const frame = requestAnimationFrame(() => {
+      setMobileOpen(false);
+      setDropOpen(false);
+    });
+    return () => cancelAnimationFrame(frame);
   }, [pathname]);
 
   // Dropdown er baire click korle bondho
@@ -80,8 +88,8 @@ export default function Navbar({
   // Active link check (My Dashboard dashboard er shob page e active thakbe)
   const isActive = (href: string) => {
     if (href === "/") return pathname === "/";
-    if (href.startsWith("/dashboard")) return pathname.startsWith("/dashboard");
-    return pathname.startsWith(href);
+    if (href.toLowerCase().startsWith("/dashboard")) return path.startsWith("/dashboard");
+    return path.startsWith(href.toLowerCase());
   };
 
   const linkClass = (active: boolean) =>
@@ -172,7 +180,7 @@ export default function Navbar({
                 </div>
                 <div className="h-px bg-[#D9D9D9]" />
                 <Link
-                  href="/dashboard/customer/profile"
+                  href={profileLink}
                   className="mt-2 block rounded-xl px-3 py-2.5 text-sm text-[#333333] transition-colors hover:bg-[#F3EEE3] hover:text-[#D9541E]"
                 >
                   Profile
@@ -252,7 +260,7 @@ export default function Navbar({
                   </p>
                 </div>
               </div>
-              <Link href="/dashboard/customer/profile" className="block rounded-full px-4 py-2 text-sm text-[#333333] hover:text-[#D9541E]">
+              <Link href={profileLink} className="block rounded-full px-4 py-2 text-sm text-[#333333] hover:text-[#D9541E]">
                 Profile
               </Link>
               <button

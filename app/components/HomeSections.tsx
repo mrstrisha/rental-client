@@ -319,7 +319,11 @@ export default function HomeSections() {
 
   const openDetails = (id: string) => {
     if (isPending) return;
-    router.push(session?.user ? `/equipment/${id}` : "/login");
+    router.push(
+      session?.user
+        ? `/equipment/${id}`
+        : `/login?redirect=${encodeURIComponent(`/equipment/${id}`)}`
+    );
   };
 
   const recentItems = items.slice(0, 3);

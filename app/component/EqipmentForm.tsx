@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import { apiFetch } from "@/lib/apiFetch";
-import { CATEGORIES, CONDITIONS } from "@/lib/types";
+import { CATEGORIES, CONDITIONS, type EquipmentInput } from "@/lib/types";
 import { btnDark, inputClass } from "@/app/component/Ui";
 
 type ChangeEv = React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>;
@@ -18,22 +18,32 @@ function Field({ label, children, full }: { label: string; children: React.React
   );
 }
 
-export default function AddEquipmentForm(props: any)  {
+type AddEquipmentFormProps = {
+  initial?: EquipmentInput;
+  submitLabel?: string;
+  onSubmit?: (values: EquipmentInput) => Promise<void> | void;
+};
+
+export default function AddEquipmentForm({
+  initial,
+  submitLabel,
+  onSubmit,
+}: AddEquipmentFormProps) {
   const router = useRouter();
 
   const [form, setForm] = useState({
-    name: "",
-    description: "",
-    category: CATEGORIES[0],
-    location: "",
-    rentalPrice: "",
-    rentalType: "Daily",
-    quantity: "",
-    condition: CONDITIONS[2],
-    brand: "",
-    model: "",
-    image: "",
-    terms: "",
+    name: initial?.name ?? "",
+    description: initial?.description ?? "",
+    category: initial?.category ?? CATEGORIES[0],
+    location: initial?.location ?? "",
+    rentalPrice: initial ? String(initial.rentalPrice) : "",
+    rentalType: initial?.rentalType ?? "Daily",
+    quantity: initial ? String(initial.quantity) : "",
+    condition: initial?.condition ?? CONDITIONS[2],
+    brand: initial?.brand ?? "",
+    model: initial?.model ?? "",
+    image: initial?.image ?? "",
+    terms: initial?.terms ?? "",
   });
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -82,14 +92,35 @@ export default function AddEquipmentForm(props: any)  {
       return;
     }
 
+    // Safe fields only: owner identity and status are always set by the backend.
+    const values: EquipmentInput = {
+      name: form.name,
+      description: form.description,
+      category: form.category,
+      location: form.location,
+      rentalPrice: price,
+      rentalType: form.rentalType as EquipmentInput["rentalType"],
+      quantity: qty,
+      condition: form.condition,
+      brand: form.brand,
+      model: form.model,
+      image: form.image,
+      terms: form.terms,
+    };
+
     setSaving(true);
     try {
+      if (onSubmit) {
+        await onSubmit(values);
+        return;
+      }
+
       await apiFetch("/api/owner/equipment", {
         method: "POST",
-        body: JSON.stringify({ ...form, rentalPrice: price, quantity: qty }),
+        body: JSON.stringify(values),
       });
       toast.success("Equipment added. Waiting for admin approval.");
-      router.push("/Dashboard/owner/equipment");
+      router.push("/Dashboard/owner/myEquiment");
     } catch (err) {
       toast.error((err as Error).message);
     } finally {
@@ -172,7 +203,7 @@ export default function AddEquipmentForm(props: any)  {
 
       <div className="md:col-span-2">
         <button type="submit" disabled={saving || uploading} className={`${btnDark} px-8 py-3 text-sm`}>
-          {saving ? "Saving..." : "Add Equipment"}
+          {saving ? "Saving..." : submitLabel ?? "Add Equipment"}
         </button>
       </div>
     </form>

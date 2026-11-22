@@ -26,27 +26,27 @@ export const navLinks: Record<Role, NavLink[]> = {
   customer: [
     { label: "Home", href: "/", exact: true },
     { label: "Browse Equipment", href: "/equipment" },
-    { label: "My Bookings", href: "/dashboard/customer/bookings" },
-    { label: "My Reviews", href: "/dashboard/customer/reviews" },
+    { label: "My Bookings", href: "/Dashboard/customer/bookings" },
+    { label: "My Reviews", href: "/Dashboard/customer/reviews" },
   ],
 
   owner: [
     { label: "Home", href: "/", exact: true },
     { label: "Browse Equipment", href: "/equipment" },
-    { label: "My Equipment", href: "/dashboard/owner/equipment" },
-    { label: "Add Equipment", href: "/dashboard/owner/add-equipment" },
-    { label: "Manage Bookings", href: "/dashboard/owner/bookings" },
+    { label: "My Equipment", href: "/Dashboard/owner/equipment" },
+    { label: "Add Equipment", href: "/Dashboard/owner/add-equipment" },
+    { label: "Manage Bookings", href: "/Dashboard/owner/bookings" },
   ],
 
   admin: [
     { label: "Home", href: "/", exact: true },
-    { label: "Dashboard", href: "/dashboard/admin", exact: true },
-    { label: "Manage Users", href: "/dashboard/admin/users" },
-    { label: "Manage Equipment", href: "/dashboard/admin/equipment" },
-    { label: "Manage Bookings", href: "/dashboard/admin/bookings" },
-    { label: "Reports", href: "/dashboard/admin/reports" },
+    { label: "Dashboard", href: "/Dashboard/admin", exact: true },
+    { label: "Manage Users", href: "/Dashboard/admin/users" },
+    { label: "Manage Equipment", href: "/Dashboard/admin/equipment" },
+    { label: "Manage Bookings", href: "/Dashboard/admin/bookings" },
+    { label: "Reports", href: "/Dashboard/admin/reports" },
   ],
 };
 
 // Profile shob logged in user er jonno same page
-export const profileHref = "/dashboard/profile";
+export const profileHref = "/Dashboard/profile";

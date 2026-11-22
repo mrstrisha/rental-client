@@ -89,7 +89,7 @@ export default function AddEquipmentForm(props: any)  {
         body: JSON.stringify({ ...form, rentalPrice: price, quantity: qty }),
       });
       toast.success("Equipment added. Waiting for admin approval.");
-      router.push("/dashboard/owner/equipment");
+      router.push("/Dashboard/owner/equipment");
     } catch (err) {
       toast.error((err as Error).message);
     } finally {

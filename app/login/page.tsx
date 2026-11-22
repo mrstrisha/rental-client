@@ -2,8 +2,11 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
-import type { FormEvent } from "react";
+import { startTransition, type FormEvent } from "react";
+import { authClient } from "@/lib/auth-client";
+import { dashboardUrlForRole } from "@/lib/navLinks";
 
 const fields = [
   {
@@ -20,34 +23,28 @@ const fields = [
   },
 ];
 
-const handleLogin = async (e: FormEvent<HTMLFormElement>) => {
+const handleLogin = async (
+  e: FormEvent<HTMLFormElement>,
+  router: ReturnType<typeof useRouter>
+) => {
   e.preventDefault();
 
   const formData = new FormData(e.currentTarget);
   const userData = Object.fromEntries(formData.entries());
 
   try {
-    // Step 1: Login request Better Auth e pathano
-    const res = await fetch("/api/auth/sign-in/email", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        email: userData.email,
-        password: userData.password,
-      }),
+    // Step 1: Better Auth sign-in
+    const result = await authClient.signIn.email({
+      email: String(userData.email),
+      password: String(userData.password),
     });
 
-    const data = await res.json();
-
-    // Step 2: Login successful kina check
-    if (!res.ok) {
-      toast.error(data.message || "Login failed");
+    if (result.error) {
+      toast.error(result.error.message || "Login failed");
       return;
     }
 
-    // Step 3: JWT token ana
+    // Step 2: JWT token ana (existing behavior)
     const tokenRes = await fetch("/api/auth/token");
     const tokenData = await tokenRes.json();
 
@@ -56,10 +53,16 @@ const handleLogin = async (e: FormEvent<HTMLFormElement>) => {
       return;
     }
 
-    // Step 4: Token check
+    // Step 3: Token check
     console.log("JWT Token:", tokenData.token);
 
+    // Role Better Auth er authenticated user theke ashe, form theke na.
+    const role = result.data.user.role;
+
     toast.success("Login successful!");
+    startTransition(() => {
+      router.push(dashboardUrlForRole(role));
+    });
   } catch (error) {
     console.log(error);
     toast.error("Something went wrong!");
@@ -67,13 +70,15 @@ const handleLogin = async (e: FormEvent<HTMLFormElement>) => {
 };
 
 export default function LoginPage() {
+  const router = useRouter();
+
   return (
     <main className="grid min-h-screen bg-[#F3EEE3] md:grid-cols-2">
 
       {/* Left side: form */}
       <section className="flex items-center justify-center p-6 md:p-12">
         <form
-          onSubmit={handleLogin}
+          onSubmit={(e) => handleLogin(e, router)}
           className="w-full max-w-sm"
         >
           {/* Brand */}
@@ -138,7 +143,7 @@ export default function LoginPage() {
           <p className="mt-6 text-center text-sm text-[#6B6B6B]">
             Don&apos;t have an account?{" "}
             <Link
-              href="/signup"
+              href="/signUp"
               className="font-medium text-[#D9541E] hover:underline"
             >
               Sign up

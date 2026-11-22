@@ -9,6 +9,14 @@ export type NavLink = {
   exact?: boolean; // true hole shudhu oi exact page e "active" hobe
 };
 
+// Session user er actual role upor bhitti kore dashboard route bicchho kore.
+export function dashboardUrlForRole(role?: string | null): string {
+  const normalized = String(role ?? "").toLowerCase();
+  if (normalized === "admin") return "/Dashboard/admin";
+  if (normalized === "owner") return "/Dashboard/owner";
+  return "/Dashboard/customer";
+}
+
 export const navLinks: Record<Role, NavLink[]> = {
   guest: [
     { label: "Home", href: "/", exact: true },

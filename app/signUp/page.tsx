@@ -1,7 +1,11 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { startTransition } from "react";
 import { toast } from "react-toastify";
+import { authClient } from "@/lib/auth-client";
+import { dashboardUrlForRole } from "@/lib/navLinks";
 
 // Form er input gulo ekhane list kora ache, tai bar bar likhte hobe na
 const fields = [
@@ -12,7 +16,10 @@ const fields = [
   { name: "confirm", label: "Confirm password", type: "password" },
 ];
 
-const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+const handleSubmit = async (
+  e: React.FormEvent<HTMLFormElement>,
+  router: ReturnType<typeof useRouter>
+) => {
   e.preventDefault();
 
   const formData = new FormData(e.currentTarget);
@@ -45,33 +52,25 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
   }
 
   // Send data to Better Auth
-  const res = await fetch("/api/auth/sign-up/email", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      name: userData.name,
-      email: userData.email,
-      image: userData.photo,
-      password: password,
-    }),
+  const result = await authClient.signUp.email({
+    name: String(userData.name),
+    email: String(userData.email),
+    image: String(userData.photo || ""),
+    password,
   });
 
-const responseText = await res.text();
+  if (result.error) {
+    toast.error("Registration failed. Check console.");
+    return;
+  }
 
-console.log("Server Status:", res.status);
-console.log("Server Response:", responseText);
+  // Role Better Auth er authenticated user theke ashe, form theke na.
+  const role = result.data.user.role;
 
-if (!res.ok) {
-  toast.error("Registration failed. Check console.");
-  return;
-}
-
-const data = JSON.parse(responseText);
-
-console.log(data);
-toast.success("Registration successful!");
+  toast.success("Registration successful!");
+  startTransition(() => {
+    router.push(dashboardUrlForRole(role));
+  });
 };
 const rules = [
   "Minimum 6 characters",
@@ -80,6 +79,8 @@ const rules = [
 ];
 
 export default function SignUpPage() {
+  const router = useRouter();
+
   return (
     // Pura page: cream background, 2 ta column
     <main className="grid min-h-screen bg-[#F3EEE3] text-[#111111] md:grid-cols-2">
@@ -103,7 +104,7 @@ export default function SignUpPage() {
 
       {/* ---------- Right side: form ---------- */}
       <section className="flex items-center justify-center p-6">
-        <form onSubmit={handleSubmit} className="w-full max-w-md">
+        <form onSubmit={(e) => handleSubmit(e, router)} className="w-full max-w-md">
           <h2 className="text-4xl">Create your account</h2>
           <p className="mt-2 text-[#111111]/60">It takes under a minute.</p>
 

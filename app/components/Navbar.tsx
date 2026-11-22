@@ -31,10 +31,10 @@ export default function Navbar({
   // 2. "My Dashboard" e click korle role onujayi alada dashboard e jabe
   const dashboardLink =
     role === "admin"
-      ? "/dashboard/admin/users"
+      ? "/Dashboard/admin/users"
       : role === "owner"
-      ? "/dashboard/owner/equipment"
-      : "/dashboard/customer/rentals";
+      ? "/Dashboard/owner/equipment"
+      : "/Dashboard/customer/rentals";
 
   // 3. Navbar er link gulo. My Dashboard shudhu login thakle dekhabe.
   const links = [

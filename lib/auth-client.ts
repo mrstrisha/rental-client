@@ -8,6 +8,8 @@ export const authClient = createAuthClient({
       
     plugins: [inferAdditionalFields<typeof auth>(), jwtClient()],
   
-  baseURL: "http://localhost:3000",
+   baseURL: process.env.NEXT_PUBLIC_API_URL,
+  
   
 });
+ console.log("Better Auth API URL:", process.env.NEXT_PUBLIC_API_URL);

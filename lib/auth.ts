@@ -22,8 +22,16 @@ const toOrigin = (value?: string) => {
 const localOrigin = "http://localhost:3000";
 const productionOrigin = "https://rental-client-wine.vercel.app";
 
-const configuredUrl = process.env.BETTER_AUTH_URL || localOrigin;
-const authOrigin = toOrigin(configuredUrl) || localOrigin;
+const isProduction = process.env.NODE_ENV === "production" || Boolean(process.env.VERCEL);
+const defaultOrigin = isProduction ? productionOrigin : localOrigin;
+
+// Never let production silently sign JWTs with a localhost issuer/audience.
+// This is the exact value the Express backend verifies with `jose`.
+const configuredOrigin = toOrigin(process.env.BETTER_AUTH_URL);
+const authOrigin =
+  configuredOrigin && !(isProduction && configuredOrigin === localOrigin)
+    ? configuredOrigin
+    : defaultOrigin;
 
 const trustedOrigins = Array.from(
   new Set(

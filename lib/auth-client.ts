@@ -7,6 +7,8 @@ import { jwtClient } from "better-auth/client/plugins";
 // Do not point the auth client at NEXT_PUBLIC_API_URL; that URL is only for
 // the Express data API. With no explicit baseURL, Better Auth uses the
 // relative /api/auth path on the current origin.
+
+
 export const authClient = createAuthClient({
   plugins: [inferAdditionalFields<typeof auth>(), jwtClient()],
 });

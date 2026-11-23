@@ -10,11 +10,40 @@ if (!mongoUri) {
   throw new Error("MONGODB_URI is missing from environment variables");
 }
 
+const toOrigin = (value?: string) => {
+  if (!value) return null;
+  try {
+    return new URL(value).origin;
+  } catch {
+    return null;
+  }
+};
+
+const localOrigin = "http://localhost:3000";
+const productionOrigin = "https://rental-client-wine.vercel.app";
+
+const configuredUrl = process.env.BETTER_AUTH_URL || localOrigin;
+const authOrigin = toOrigin(configuredUrl) || localOrigin;
+
+const trustedOrigins = Array.from(
+  new Set(
+    [
+      localOrigin,
+      productionOrigin,
+      authOrigin,
+      toOrigin(process.env.FRONTEND_URL),
+      toOrigin(process.env.NEXT_PUBLIC_API_URL),
+    ].filter((value): value is string => Boolean(value))
+  )
+);
+
 const client = new MongoClient(mongoUri);
 
 const db = client.db("equipment_rental");
 
 export const auth = betterAuth({
+  baseURL: authOrigin,
+  trustedOrigins,
   database: mongodbAdapter(db, {
     client,
   }),
@@ -45,8 +74,8 @@ export const auth = betterAuth({
     plugins: [
     jwt({
       jwt: {
-        issuer: process.env.BETTER_AUTH_URL,
-        audience: process.env.BETTER_AUTH_URL,
+        issuer: authOrigin,
+        audience: authOrigin,
         expirationTime: "15m",
       },
     }),
